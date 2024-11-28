@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Ignorar a validação para a página de erro
+  // Ignorar rotas específicas, como a página de erro
   if (pathname === '/error') {
     return NextResponse.next();
   }
@@ -11,9 +11,9 @@ export function middleware(request: NextRequest) {
   // Obter o parâmetro 'userName' da URL
   const encodedUserName = request.nextUrl.searchParams.get('userName');
 
-  // Verificar se o parâmetro 'userName' é válido
+  // Verificar se o parâmetro 'userName' existe
   if (!encodedUserName || encodedUserName.trim() === '') {
-    // Redirecionar para a página de erro, evitando loops
+    // Redirecionar para a página de erro, se não estiver presente
     return NextResponse.redirect(new URL('/error', request.url));
   }
 
@@ -26,14 +26,19 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/error', request.url));
   }
 
-  // Adicionar o userName decodificado no cabeçalho para acesso posterior
+  // Criar uma resposta e adicionar o cookie
   const response = NextResponse.next();
-  response.headers.set('userInfo', JSON.stringify({ userName }));
+  response.cookies.set('userName', userName, {
+    httpOnly: true, // Evita acesso pelo JavaScript no cliente
+    secure: process.env.NODE_ENV === 'production', // Só envia cookies em conexões seguras no ambiente de produção
+    sameSite: 'strict', // Evita envio de cookies entre sites
+    path: '/', // Disponível em todo o site
+  });
 
   return response;
 }
 
-// Configuração para aplicar o middleware em rotas específicas
+// Configuração para aplicar o middleware em todas as rotas
 export const config = {
-  matcher: '/:path*', // Aplica o middleware a todas as rotas
+  matcher: '/:path*',
 };
