@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
   
+    if (pathname === '/error') {
+    return NextResponse.next();
+  }
   const encodedUserName = request.nextUrl.searchParams.get('userName');
 
   if (!encodedUserName || encodedUserName.trim() === '') {
