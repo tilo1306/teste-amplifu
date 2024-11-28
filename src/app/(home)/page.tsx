@@ -1,17 +1,21 @@
-'use client'; // Este arquivo será renderizado no cliente
+'use client'; // Garantir que a página seja renderizada no cliente
 
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
-export default function Home() {
-  // Usar o hook useSearchParams para acessar os parâmetros
+function UserComponent() {
   const searchParams = useSearchParams();
 
-  // Recuperar o parâmetro 'userName'
+  // Recuperar o parâmetro 'userName' da URL
   const userName = decodeURIComponent(searchParams.get('userName') || 'Usuário não identificado');
 
+  return <h1>{`Bem-vindo, ${userName}`}</h1>;
+}
+
+export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <h1>{`Bem-vindo, ${userName}`}</h1>
-    </div>
+    <Suspense fallback={<div>Carregando...</div>}>
+      <UserComponent />
+    </Suspense>
   );
 }
